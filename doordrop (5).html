@@ -1,0 +1,807 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DoorDrop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#081A33; --surface:#0F2847; --ink:#EAF4FF; --muted:#9DB4D0; --line:#264A75; --card-line:rgba(127,255,212,.24);
+  --brand:#7FFFD4; --brand-ink:#081A33;
+  --accent:#7FFFD4; --focus:#7FFFD4;
+  --hdr:#143B70; --hdr-muted:#B4C8E2;
+  --ok:#7FFFD4; --ok-bg:#0C3F44; --warn:#F5C25B; --warn-bg:#3A2C0B; --bad:#FF8B7E; --bad-bg:#40191A; --off:#A9BBD1; --off-bg:#1A3557;
+  --head:'Bricolage Grotesque','Trebuchet MS',system-ui,sans-serif;
+  --body:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:dark;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);-webkit-text-size-adjust:100%}
+.wrap{max-width:640px;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px;padding:18px 20px;background:var(--hdr);border-radius:18px}
+.brandrow{display:flex;align-items:center;gap:10px;cursor:pointer;background:none;border:0;padding:0;text-align:left}
+h1{font:800 clamp(30px,8vw,40px)/1 var(--head);letter-spacing:-.02em;margin:0;color:var(--accent)}
+.tag{margin:8px 0 0;color:var(--hdr-muted);font-size:15px;max-width:34ch}
+h2{font:600 20px/1.2 var(--head);margin:0 0 12px}
+h3{font:600 17px/1.25 var(--head);margin:0}
+.tabs{display:inline-flex;flex-wrap:wrap;background:rgba(255,255,255,.1);border-radius:999px;padding:3px;gap:2px}
+.tabs button{border:0;background:transparent;color:var(--hdr-muted);font:500 14px var(--body);padding:8px 14px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.tabs button[aria-pressed="true"]{background:var(--accent);color:#0A1F3D;font-weight:700}
+.session{display:flex;align-items:center;gap:10px;color:var(--hdr-muted);font-weight:500}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+header button:focus-visible{outline-color:var(--accent)}
+
+.strip{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;border-radius:14px;margin-bottom:16px;font-size:15px}
+.strip strong{font-weight:700}
+.strip .lamp{width:12px;height:12px;border-radius:50%;background:currentColor;flex:none}
+.strip.free{background:var(--ok-bg);color:var(--ok)}
+.strip.busy{background:var(--warn-bg);color:var(--warn)}
+.strip.off{background:var(--off-bg);color:var(--off)}
+
+.card{background:var(--surface);border:1px solid var(--card-line);border-radius:14px;padding:16px;margin-bottom:16px}
+label{display:block;font-weight:500;font-size:14px;margin:12px 0 4px}
+input[type=text],input[type=number],input[type=tel],input[type=password],input[type=time],textarea,select{width:100%;font:16px var(--body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+textarea{min-height:76px;resize:vertical}
+.hint{color:var(--muted);font-size:13px;margin:8px 0 0}
+.err{color:var(--bad);font-size:14px;font-weight:500;margin:6px 0 0}
+input:invalid, select:invalid, textarea:invalid{box-shadow:none}
+.field-err input, .field-err select, .field-err textarea{border-color:var(--bad)}
+.btn{font:700 15px var(--body);border-radius:10px;padding:11px 16px;border:1px solid transparent;cursor:pointer}
+.btn.primary{background:var(--brand);color:var(--brand-ink)}
+.btn.line{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.danger{background:transparent;color:var(--bad);border-color:var(--line)}
+.btn.small{padding:6px 12px;font-size:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.full{width:100%;margin-top:16px}
+a.btn{display:inline-block;text-decoration:none;text-align:center}
+
+.decision{border:2px solid var(--warn);background:var(--surface)}
+.decision.good{border-color:var(--ok)}
+.warnbox{background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:8px 12px;font-size:14px}
+
+.badge{display:inline-block;font-size:13px;font-weight:700;border-radius:999px;padding:2px 10px}
+.badge.active{background:var(--ok-bg);color:var(--ok)}
+.badge.queued{background:var(--warn-bg);color:var(--warn)}
+.badge.done{background:var(--off-bg);color:var(--off)}
+.badge.cancelled{background:var(--bad-bg);color:var(--bad)}
+.order-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.meta{color:var(--muted);font-size:14px;margin:2px 0}
+.empty{color:var(--muted);margin:0}
+
+.item{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:12px}
+.item-top{display:flex;justify-content:space-between;align-items:center}
+.item .fl{display:block;font-weight:500;font-size:14px;margin:10px 0 0}
+.item .fl input{margin-top:4px;font-weight:400}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+ul.items{margin:4px 0 0 18px;padding:0}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:4px 6px 4px 12px;font-size:14px}
+.chip button{border:0;background:transparent;color:var(--muted);font-size:18px;line-height:1;cursor:pointer;padding:2px 6px}
+.inline{display:flex;gap:8px}
+.inline input{flex:1}
+
+.switch{display:flex;align-items:center;gap:10px;font-weight:500;margin:0}
+.switch input{width:22px;height:22px;accent-color:var(--brand)}
+.stats{display:flex;gap:24px;flex-wrap:wrap}
+.stats div{min-width:110px}
+.stats b{display:block;font:800 30px/1.1 var(--head)}
+.stats span{color:var(--muted);font-size:14px}
+
+.schedrow{display:grid;grid-template-columns:auto 1fr 1fr 1fr;gap:8px;align-items:center;margin-top:10px}
+.schedrow:first-of-type{margin-top:14px}
+.schedrow .dayname{font-weight:600;font-size:14px}
+.schedrow input[type=time]{padding:8px}
+.schedrow.off input[type=time]{opacity:.4}
+.opt{display:flex;align-items:center;gap:8px;font-weight:400;font-size:15px}
+.opt input{width:20px;height:20px;accent-color:var(--brand);flex:none}
+
+.foot{color:var(--muted);font-size:13px;margin-top:24px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--accent);color:var(--bg);font-weight:500;padding:10px 16px;border-radius:10px;font-size:14px;max-width:90%;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.show{opacity:1}
+[hidden]{display:none !important}
+@media (prefers-reduced-motion:reduce){#toast{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <button type="button" class="brandrow" id="brandBtn" aria-label="DoorDrop home">
+      <svg viewBox="0 0 24 24" width="34" height="34" aria-hidden="true"><path d="M12 1.5C12 1.5 4.5 10 4.5 15.2a7.5 7.5 0 0015 0C19.5 10 12 1.5 12 1.5z" fill="#7FFFD4"/><path d="M8.6 15.4l2.4 2.4 4.6-5" stroke="#0A1F3D" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <h1>DoorDrop</h1>
+    </button>
+    <div id="navPills" class="tabs" role="group" aria-label="Switch view" hidden>
+      <button type="button" data-view="order" aria-pressed="true">Order</button>
+      <button type="button" data-view="login" aria-pressed="false">Driver log in</button>
+      <button type="button" data-view="create" aria-pressed="false">Create account</button>
+    </div>
+    <div id="sessionBar" class="session" hidden>
+      <span id="sessionName"></span>
+      <button type="button" class="btn line small" data-act="logout">Log out</button>
+    </div>
+  </header>
+  <p class="tag" id="pageTag" style="margin:-8px 0 16px">Neighborhood delivery by ebike. Lower fees, one order at a time.</p>
+
+  <!-- ORDER VIEW -->
+  <section id="view-order" hidden>
+    <div id="strip" class="strip" role="status"></div>
+    <div id="noDrivers" class="card" hidden>
+      <h2>No drivers yet</h2>
+      <p class="empty">Nobody has signed up to deliver yet. If you're a driver, tap "Create account" above.</p>
+    </div>
+    <div id="sent"></div>
+    <div id="confirm"></div>
+
+    <form id="orderForm" class="card" autocomplete="off" novalidate>
+      <h2>Place an order</h2>
+      <p class="err" id="formError" role="alert" hidden></p>
+      <label for="f-name">Your name</label>
+      <input id="f-name" name="name" type="text" required maxlength="40">
+      <label for="f-center">Which shopping center?</label>
+      <select id="f-center" name="center" required></select>
+      <p class="hint" id="centerHint"></p>
+      <label for="f-place">Which shop or restaurant there?</label>
+      <input id="f-place" name="place" type="text" required maxlength="60" list="placeList" placeholder="Shop or restaurant name">
+      <datalist id="placeList"></datalist>
+
+      <h3 style="margin-top:18px">What do you want?</h3>
+      <p class="hint">Be as specific as you can: brand, size, flavor or type, and how many.</p>
+      <div id="itemRows"></div>
+      <button type="button" class="btn line" data-act="addItem" style="margin-top:12px">Add another item</button>
+      <label for="f-sub">If they're out of something</label>
+      <select id="f-sub" name="sub"><option>Text me first</option><option>Get the closest match</option><option>Skip it</option></select>
+
+      <label for="f-hood">Neighborhood</label>
+      <select id="f-hood" name="hood" required></select>
+      <label for="f-address">Drop-off address</label>
+      <input id="f-address" name="address" type="text" required maxlength="80" list="addrList" placeholder="House number and street">
+      <datalist id="addrList"></datalist>
+      <label for="f-unit">Apartment, gate code, or meeting spot (optional)</label>
+      <input id="f-unit" name="unit" type="text" maxlength="60">
+      <label for="f-note">Anything else? (optional)</label>
+      <input id="f-note" name="note" type="text" maxlength="100">
+
+      <div class="card" style="margin-top:16px;background:var(--bg)">
+        <h3>Payment</h3>
+        <p class="hint" id="feeRangeHint" style="margin-top:4px">Drivers only take Apple Pay. I'll send an Apple Pay request to your phone number for your items, so a driver can buy them.</p>
+        <label for="f-phone">Your phone number</label>
+        <input id="f-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required maxlength="20" placeholder="(555) 555-5555">
+        <label for="f-feewhen" style="margin-top:12px">Delivery fee</label>
+        <select id="f-feewhen" name="feeWhen"><option value="now">Pay it with my items</option><option value="delivery">Pay it when it's delivered</option></select>
+      </div>
+      <p class="hint">Food and everyday items only. No alcohol, tobacco, or vapes.</p>
+      <button class="btn primary full" type="submit">Place order</button>
+    </form>
+
+    <h2>Your orders</h2>
+    <div id="mine"></div>
+  </section>
+
+  <!-- DRIVER LOG IN -->
+  <section id="view-login" hidden>
+    <form id="loginForm" class="card" autocomplete="off" novalidate>
+      <h2>Driver log in</h2>
+      <p class="err" id="loginError" role="alert" hidden></p>
+      <label for="l-name">Name</label>
+      <input id="l-name" name="name" type="text" required maxlength="40">
+      <label for="l-pass">Password</label>
+      <input id="l-pass" name="pass" type="password" required maxlength="60">
+      <button class="btn primary full" type="submit">Log in</button>
+      <p class="hint">No account yet? Tap "Create account" above.</p>
+    </form>
+  </section>
+
+  <!-- CREATE DRIVER ACCOUNT -->
+  <section id="view-create" hidden>
+    <form id="createForm" class="card" autocomplete="off" novalidate>
+      <h2>Create a driver account</h2>
+      <p class="err" id="createError" role="alert" hidden></p>
+      <label for="c-name">Your name</label>
+      <input id="c-name" name="name" type="text" required maxlength="40" placeholder="First name and last initial works well">
+      <label for="c-pass">Make a password</label>
+      <input id="c-pass" name="pass" type="password" required minlength="4" maxlength="60">
+      <p class="hint">This demo saves your password as plain text in this browser only &mdash; it's not real security. Don't reuse a password you use anywhere else.</p>
+      <h3 style="margin-top:18px">When are you usually available?</h3>
+      <p class="hint">Check the days you can deliver and set a rough time range. You can change this anytime, and you can also go online or offline manually.</p>
+      <div id="createSchedule"></div>
+      <button class="btn primary full" type="submit" style="margin-top:16px">Create account</button>
+      <p class="hint">Already have an account? Tap "Driver log in" above.</p>
+    </form>
+  </section>
+
+  <!-- RIDER (DRIVER) VIEW -->
+  <section id="view-rider" hidden>
+    <div id="riderStrip" class="strip" role="status"></div>
+
+    <div class="card">
+      <h2>Settings</h2>
+      <label class="switch"><input id="onlineToggle" type="checkbox"> Taking orders right now</label>
+      <div class="two" style="margin-top:14px">
+        <div>
+          <label for="feeInput">Delivery fee ($)</label>
+          <input id="feeInput" type="number" min="0" step="0.5">
+        </div>
+        <div>
+          <label for="avgInput">Minutes per delivery</label>
+          <input id="avgInput" type="number" min="5" step="5">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>My weekly hours</h2>
+      <p class="hint">Used to tell customers when you're generally around. Your "Taking orders" switch above still controls things minute to minute.</p>
+      <div id="riderSchedule"></div>
+      <button class="btn line full" data-act="saveSchedule" style="margin-top:14px">Save hours</button>
+    </div>
+
+    <div class="card">
+      <h2>Shopping centers I pick up from</h2>
+      <div class="inline"><input id="newCenter" type="text" maxlength="60" placeholder="Shopping center name" aria-label="New shopping center"><button class="btn line" data-act="addCenter">Add</button></div>
+      <div id="centerChips" class="chips"></div>
+      <p class="hint">Customers can only pick you for these centers.</p>
+    </div>
+
+    <div class="card">
+      <h2>Neighborhoods I deliver to</h2>
+      <div class="inline"><input id="newArea" type="text" maxlength="40" placeholder="Neighborhood name" aria-label="New neighborhood"><button class="btn line" data-act="addArea">Add</button></div>
+      <div id="areaChips" class="chips"></div>
+      <p class="hint" id="okHint" hidden>Approved by request:</p>
+      <div id="okChips" class="chips"></div>
+      <p class="hint">Leave the list empty to accept any neighborhood.</p>
+    </div>
+
+    <h2>Address requests</h2>
+    <div id="reviews" class="card"></div>
+
+    <h2>Orders you can take</h2>
+    <div id="pool" class="card"></div>
+
+    <h2>Now delivering</h2>
+    <div id="now" class="card"></div>
+
+    <h2>Waiting in your line</h2>
+    <div id="queue" class="card"></div>
+
+    <div class="card">
+      <div id="stats" class="stats"></div>
+      <div class="row">
+        <button class="btn line" data-act="clearAddrs">Clear saved addresses</button>
+        <button class="btn danger" data-act="resetAll">Reset all DoorDrop data</button>
+      </div>
+    </div>
+  </section>
+
+  <p class="foot">Prototype: everything is saved in this browser only. Open this page in another tab on the same device to try ordering and driving at once &mdash; a real launch needs a shared backend so every device sees the same orders.</p>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  var STORE_KEY='doordrop-v2';
+  var DAY_ORDER=[{key:'mon',label:'Monday'},{key:'tue',label:'Tuesday'},{key:'wed',label:'Wednesday'},{key:'thu',label:'Thursday'},{key:'fri',label:'Friday'},{key:'sat',label:'Saturday'},{key:'sun',label:'Sunday'}];
+  var DOW_JS=['sun','mon','tue','wed','thu','fri','sat'];
+
+  function freshSchedule(){var s={};DAY_ORDER.forEach(function(d){s[d.key]={on:false,start:'15:00',end:'19:00'};});return s;}
+  function fresh(){return {drivers:{},orders:[],nextOrderId:1,addrs:[],places:[],mineIds:[],session:null};}
+  function load(){
+    try{var r=localStorage.getItem(STORE_KEY); if(r){var p=JSON.parse(r); if(p&&p.drivers&&p.orders) return p;}}catch(e){}
+    return fresh();
+  }
+  var S=load();
+  var view='order', pending=null, confirming=null, sentId=null, toastTimer=null;
+  function save(){try{localStorage.setItem(STORE_KEY,JSON.stringify(S));}catch(e){}}
+  function $(s){return document.querySelector(s);}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function money(n){return '$'+Number(n||0).toFixed(2);}
+  function toast(msg){
+    var t=$('#toast'); t.textContent=msg; t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer=setTimeout(function(){t.classList.remove('show');},3200);
+  }
+  function mapsUrl(q){return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);}
+
+  // ---------- drivers ----------
+  function driverList(){return Object.keys(S.drivers).map(function(k){return S.drivers[k];});}
+  function currentDriver(){return S.session ? S.drivers[S.session] : null;}
+  function allCenters(){
+    var set=[]; driverList().forEach(function(d){d.centers.forEach(function(c){if(set.indexOf(c)<0) set.push(c);});});
+    return set;
+  }
+  function allAreas(){
+    var set=[]; driverList().forEach(function(d){d.areas.forEach(function(a){if(set.indexOf(a)<0) set.push(a);});});
+    return set;
+  }
+  function eligibleDrivers(center,hood){
+    return driverList().filter(function(d){
+      if(center && d.centers.indexOf(center)<0) return false;
+      if(hood && d.areas.length && d.areas.indexOf(hood)<0 && hood!=='__other') return false;
+      return true;
+    });
+  }
+  function activeOrderFor(id){return S.orders.find(function(o){return o.claimedBy===id && o.status==='active';});}
+  function queueFor(id){return S.orders.filter(function(o){return o.claimedBy===id && o.status==='queued';});}
+  function poolFor(d){return S.orders.filter(function(o){return !o.claimedBy && o.status==='pool' && d.centers.indexOf(o.center)>-1 && (d.areas.length===0 || d.areas.indexOf(o.hood)>-1);});}
+  function reviewFor(d){return S.orders.filter(function(o){return !o.claimedBy && o.status==='review' && d.centers.indexOf(o.center)>-1 && (!o.declinedBy || o.declinedBy.indexOf(d.name)<0);});}
+  function remainingMinutes(order,driver){
+    if(!order) return 0;
+    var used=Math.floor((Date.now()-order.startedAt)/60000);
+    return Math.max(5,(driver.avgMin||20)-used);
+  }
+
+  // ---------- scheduling ----------
+  function combine(dateOnly,hhmm){
+    var parts=hhmm.split(':'); var d=new Date(dateOnly);
+    d.setHours(parseInt(parts[0],10),parseInt(parts[1],10),0,0);
+    return d;
+  }
+  function nextAvailability(schedule){
+    var now=new Date();
+    for(var off=0;off<8;off++){
+      var d=new Date(now); d.setDate(d.getDate()+off); d.setHours(0,0,0,0);
+      var key=DOW_JS[d.getDay()]; var w=schedule[key];
+      if(w&&w.on){
+        var start=combine(d,w.start), end=combine(d,w.end);
+        if(off===0){
+          if(now<start) return {date:start,label:formatWhen(start,now)};
+          if(now<end) return {date:now,label:'now'};
+        } else {
+          return {date:start,label:formatWhen(start,now)};
+        }
+      }
+    }
+    return null;
+  }
+  function formatWhen(date,now){
+    var sameDay=date.toDateString()===now.toDateString();
+    var t=new Date(now); t.setDate(t.getDate()+1);
+    var tomorrow=date.toDateString()===t.toDateString();
+    var time=date.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+    if(sameDay) return 'today at '+time;
+    if(tomorrow) return 'tomorrow at '+time;
+    return date.toLocaleDateString([], {weekday:'long'})+' at '+time;
+  }
+  function scheduleRowsHtml(prefix,values){
+    return DAY_ORDER.map(function(d){
+      var w=(values&&values[d.key])||{on:false,start:'15:00',end:'19:00'};
+      var id=prefix+'_'+d.key;
+      return '<div class="schedrow'+(w.on?'':' off')+'" data-day="'+d.key+'">'+
+        '<label class="opt"><input type="checkbox" id="'+id+'_on" '+(w.on?'checked':'')+'>'+'<span class="dayname">'+d.label+'</span></label>'+
+        '<input type="time" id="'+id+'_start" value="'+esc(w.start)+'">'+
+        '<span style="color:var(--muted);text-align:center">to</span>'+
+        '<input type="time" id="'+id+'_end" value="'+esc(w.end)+'">'+
+        '</div>';
+    }).join('');
+  }
+  function bindScheduleToggles(container){
+    container.querySelectorAll('.schedrow').forEach(function(row){
+      var cb=row.querySelector('input[type=checkbox]');
+      cb.addEventListener('change',function(){row.classList.toggle('off',!cb.checked);});
+    });
+  }
+  function readSchedule(prefix,container){
+    var s={};
+    DAY_ORDER.forEach(function(d){
+      var id=prefix+'_'+d.key;
+      var on=container.querySelector('#'+id+'_on').checked;
+      var start=container.querySelector('#'+id+'_start').value||'09:00';
+      var end=container.querySelector('#'+id+'_end').value||'17:00';
+      s[d.key]={on:on,start:start,end:end};
+    });
+    return s;
+  }
+
+  // ---------- items / validation helpers ----------
+  function pickupLabel(o){return o.center ? o.place+' ('+o.center+')' : o.place;}
+  function pickupQuery(o){return o.place+(o.center?' '+o.center:'');}
+  function feeText(o){
+    if(o.fee==null) return 'set by driver ('+(o.feeWhen==='delivery'?'pay at delivery':'pay with items')+')';
+    return money(o.fee)+' ('+(o.feeWhen==='delivery'?'pay at delivery':'pay with items')+')';
+  }
+  function itemsHtml(o){
+    if(o.itemLines&&o.itemLines.length) return '<ul class="items">'+o.itemLines.map(function(l){return '<li>'+esc(l)+'</li>';}).join('')+'</ul>';
+    return ' '+esc(o.items||'');
+  }
+  function phoneOk(v){return String(v).replace(/\D/g,'').length>=10;}
+  function addUnique(list,val){
+    if(!val) return;
+    var low=val.toLowerCase();
+    if(!list.some(function(x){return x.toLowerCase()===low;})) list.unshift(val);
+    if(list.length>30) list.length=30;
+  }
+  function remember(o){addUnique(S.addrs,o.address);addUnique(S.places,o.place);}
+  function clearFieldErrors(form){form.querySelectorAll('.field-err').forEach(function(el){el.classList.remove('field-err');});}
+  function markFieldError(input){var wrap=input.closest('label')||input.closest('.item')||input;wrap.classList.add('field-err');return input;}
+  function validateOrderForm(form){
+    clearFieldErrors(form);
+    var firstBad=null;
+    form.querySelectorAll('[required]').forEach(function(f){
+      if(f.offsetParent===null) return;
+      if(!f.value||!String(f.value).trim()){ if(!firstBad) firstBad=markFieldError(f); else markFieldError(f); }
+    });
+    var hasItem=Array.prototype.some.call(form.querySelectorAll('[name=iname]'),function(f){return f.value.trim();});
+    if(!hasItem){var firstItem=form.querySelector('[name=iname]'); if(firstItem){markFieldError(firstItem); if(!firstBad) firstBad=firstItem;}}
+    return firstBad;
+  }
+  function showFormError(elId,msg,field){
+    var el=$(elId); el.textContent=msg; el.hidden=false;
+    if(field){field.scrollIntoView({behavior:'smooth',block:'center'}); try{field.focus({preventScroll:true});}catch(e){field.focus();}}
+    else el.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+  function itemRowHtml(){
+    return '<div class="item"><div class="item-top"><strong class="item-title">Item</strong><button type="button" class="btn line small" data-act="removeItem">Remove</button></div>'+
+      '<label class="fl">What is it?<input name="iname" type="text" required maxlength="60" placeholder="e.g. Greek yogurt"></label>'+
+      '<div class="two"><label class="fl">Brand<input name="ibrand" type="text" maxlength="40" placeholder="e.g. Chobani"></label>'+
+      '<label class="fl">Size or amount<input name="isize" type="text" maxlength="30" placeholder="e.g. 32 oz"></label></div>'+
+      '<div class="two"><label class="fl">Flavor, color, or type<input name="itype" type="text" maxlength="40" placeholder="e.g. vanilla, low fat"></label>'+
+      '<label class="fl">How many<input name="iqty" type="number" min="1" max="20" value="1"></label></div>'+
+      '<label class="fl">Anything else about this item?<input name="inote" type="text" maxlength="80"></label></div>';
+  }
+  function renumberItems(){
+    var rows=document.querySelectorAll('#itemRows .item');
+    rows.forEach(function(r,i){r.querySelector('.item-title').textContent='Item '+(i+1);});
+    rows.forEach(function(r){r.querySelector('[data-act="removeItem"]').hidden=rows.length<2;});
+  }
+  function addItemRow(){var d=document.createElement('div'); d.innerHTML=itemRowHtml(); $('#itemRows').appendChild(d.firstChild); renumberItems();}
+  function resetItems(){$('#itemRows').innerHTML='';addItemRow();}
+  function readItems(form){
+    var lines=[];
+    form.querySelectorAll('.item').forEach(function(r){
+      function v(n){return (r.querySelector('[name="'+n+'"]').value||'').trim();}
+      var name=v('iname'); if(!name) return;
+      var qty=parseInt(v('iqty'),10)||1;
+      var parts=[qty+' \u00d7 '+(v('ibrand')?v('ibrand')+' ':'')+name];
+      [v('itype'),v('isize')].forEach(function(x){if(x) parts.push(x);});
+      if(v('inote')) parts.push('note: '+v('inote'));
+      lines.push(parts.join(', '));
+    });
+    return lines;
+  }
+
+  // ---------- claiming / lifecycle ----------
+  function promote(driver){
+    if(activeOrderFor(driver.name)) return;
+    var q=queueFor(driver.name).sort(function(a,b){return a.createdAt-b.createdAt;});
+    var n=q[0];
+    if(n){n.status='active';n.stage='pickup';n.startedAt=Date.now();}
+  }
+  function claim(order,driver){
+    order.claimedBy=driver.name;
+    order.fee=driver.fee;
+    remember(order);
+    if(activeOrderFor(driver.name)){order.status='queued';}
+    else{order.status='active';order.stage='pickup';order.startedAt=Date.now();}
+  }
+
+  // ---------- rendering: nav / views ----------
+  function setView(v){
+    view=v;
+    var loggedIn=!!currentDriver();
+    $('#navPills').hidden=loggedIn;
+    $('#sessionBar').hidden=!loggedIn;
+    if(loggedIn){$('#sessionName').textContent='Hi, '+currentDriver().name;}
+    ['order','login','create','rider'].forEach(function(id){
+      $('#view-'+id).hidden = loggedIn ? id!=='rider' : (id==='rider' || id!==v);
+    });
+    document.querySelectorAll('[data-view]').forEach(function(b){b.setAttribute('aria-pressed', b.getAttribute('data-view')===v ? 'true':'false');});
+    if((loggedIn?'rider':v)==='order') renderOrderView();
+    if((loggedIn?'rider':v)==='rider') renderRider();
+    window.scrollTo({top:0,behavior:'instant'});
+  }
+
+  // ---------- order view ----------
+  function availabilityFor(center,hood){
+    var list=eligibleDrivers(center,hood);
+    if(!list.length) return {mode:'none'};
+    var free=list.filter(function(d){return d.online && !activeOrderFor(d.name);});
+    var busy=list.filter(function(d){return d.online && activeOrderFor(d.name);});
+    if(free.length) return {mode:'ready'};
+    if(busy.length){
+      var best=null;
+      busy.forEach(function(d){var a=activeOrderFor(d.name); var total=remainingMinutes(a,d)+queueFor(d.name).length*(d.avgMin||20); if(best===null||total<best) best=total;});
+      return {mode:'busy',eta:best};
+    }
+    var earliest=null;
+    list.forEach(function(d){var na=nextAvailability(d.schedule); if(na&&(earliest===null||na.date<earliest.date)) earliest=na;});
+    return {mode:'offline',next:earliest};
+  }
+  function renderStrip(){
+    var el=$('#strip'), c=$('#f-center').value, h=$('#f-hood').value;
+    var av=availabilityFor(c||null,h||null);
+    var cls,text;
+    if(av.mode==='none'){cls='off';text='No drivers currently cover that combination. Try "Somewhere else" for the neighborhood to ask a driver directly.';}
+    else if(av.mode==='ready'){cls='free';text='A driver is free right now and can head out as soon as you order.';}
+    else if(av.mode==='busy'){cls='busy';text='Drivers are busy right now. Free again in about '+av.eta+' min.';}
+    else {cls='off'; text = av.next ? ('No drivers are online right now. Next expected around '+av.next.label+'. You can still place your order \u2014 it\u2019ll be waiting when a driver comes online.') : 'No drivers are online right now, and none have set their hours yet. You can still place your order.';}
+    el.className='strip '+cls;
+    el.innerHTML='<span class="lamp"></span><span>'+text+'</span>';
+  }
+  function renderNoDriversBanner(){
+    $('#noDrivers').hidden = driverList().length>0;
+    $('#orderForm').hidden = driverList().length===0;
+  }
+  function renderOrderLists(){
+    var sel=$('#f-center'), cur=sel.value;
+    var centers=allCenters();
+    sel.innerHTML='<option value="">Choose a shopping center</option>'+centers.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('');
+    if(centers.indexOf(cur)>-1) sel.value=cur;
+    $('#centerHint').textContent = centers.length ? 'Any driver who covers this center may pick up your order.' : '';
+
+    var hs=$('#f-hood'), hcur=hs.value, areas=allAreas();
+    hs.innerHTML='<option value="">Choose your neighborhood</option>'+areas.map(function(a){return '<option value="'+esc(a)+'">'+esc(a)+'</option>';}).join('')+'<option value="__other">Somewhere else (ask a driver)</option>';
+    if(hcur&&(areas.indexOf(hcur)>-1||hcur==='__other')) hs.value=hcur;
+
+    $('#addrList').innerHTML=S.addrs.map(function(a){return '<option value="'+esc(a)+'"></option>';}).join('');
+    $('#placeList').innerHTML=S.places.map(function(a){return '<option value="'+esc(a)+'"></option>';}).join('');
+
+    var c=sel.value,h=hs.value, elig=eligibleDrivers(c||null,h||null).map(function(d){return d.fee||0;});
+    if(elig.length){
+      var lo=Math.min.apply(null,elig), hi=Math.max.apply(null,elig);
+      $('#feeRangeHint').textContent='Drivers only take Apple Pay. I\u2019ll send an Apple Pay request to your phone number for your items. Delivery fee is set by your driver, usually '+(lo===hi?money(lo):money(lo)+'\u2013'+money(hi))+'.';
+    } else {
+      $('#feeRangeHint').textContent='Drivers only take Apple Pay. I\u2019ll send an Apple Pay request to your phone number for your items. Delivery fee is set by whichever driver picks up your order.';
+    }
+  }
+  function renderConfirm(){
+    var el=$('#confirm');
+    if(!confirming){el.innerHTML='';return;}
+    var c=confirming;
+    var warn=/\d/.test(c.address)?'':'<p class="warnbox">This address has no house number. Double-check it so your driver doesn\u2019t go to the wrong place.</p>';
+    el.innerHTML='<div class="card decision good"><h3>'+(c.hood==='__other'?'Is this the right address? A driver will check if they can deliver there.':'Is this the right drop-off spot?')+'</h3>'+
+      '<p><strong>'+esc(c.address)+'</strong>'+(c.unit?'<br>'+esc(c.unit):'')+(c.hood&&c.hood!=='__other'?', '+esc(c.hood):'')+'</p>'+
+      '<p class="meta">Pickup: '+esc(pickupLabel(c))+'</p><div class="meta">Order:'+itemsHtml(c)+'</div>'+
+      '<p class="meta">Apple Pay request goes to '+esc(c.phone)+'. Delivery fee: '+(c.feeWhen==='delivery'?'pay at delivery':'pay with items')+'.</p>'+warn+
+      '<div class="row"><button class="btn primary" data-act="confirmAddr">'+(c.hood==='__other'?'Yes, send the request':'Yes, that\u2019s right')+'</button>'+
+      '<a class="btn line" target="_blank" rel="noopener" href="'+esc(mapsUrl(c.address))+'">Check on map</a>'+
+      '<button class="btn line" data-act="editAddr">Edit</button></div></div>';
+  }
+  function renderSent(){
+    var el=$('#sent');
+    var o=sentId&&S.orders.find(function(x){return x.id===sentId;});
+    if(!o){el.innerHTML='';return;}
+    el.innerHTML='<div class="card decision good"><h3>'+(o.status==='review'?'Request sent':'Order sent')+'</h3>'+
+      '<p>'+(o.status==='review'?'A driver who covers that shopping center will check your address.':'Your order is waiting for a driver to pick it up. You can follow it below.')+'</p>'+
+      '<div class="row"><button class="btn line" data-act="dismissSent">Done</button></div></div>';
+  }
+  function renderMine(){
+    var list=S.mineIds.map(function(id){return S.orders.find(function(o){return o.id===id;});}).filter(Boolean).reverse();
+    var el=$('#mine');
+    if(!list.length){el.innerHTML='<p class="empty">Orders you place show up here so you can follow them.</p>';return;}
+    el.innerHTML=list.map(function(o){
+      var badge,label,status,extra='',pay='';
+      if(o.status==='pool'){badge='queued';label='Waiting for a driver';status='No driver has picked this up yet.';extra='<div class="row"><button class="btn line" data-act="cancel" data-id="'+o.id+'">Cancel order</button></div>';}
+      else if(o.status==='review'){badge='queued';label='Checking';status='Waiting for a driver to check if they can deliver there.';extra='<div class="row"><button class="btn line" data-act="cancel" data-id="'+o.id+'">Cancel request</button></div>';}
+      else if(o.status==='active'){badge='active';label='On it';status=(o.stage==='pickup'?'Your driver is heading to '+esc(o.place)+'.':'Picked up and on the way to you.')+' Driver: '+esc(o.claimedBy)+'.';}
+      else if(o.status==='queued'){var pos=queueFor(o.claimedBy).indexOf(o)+1; badge='queued';label='In line'; var d=S.drivers[o.claimedBy]; var a=activeOrderFor(o.claimedBy); status='Spot #'+pos+' with '+esc(o.claimedBy)+'. About '+(remainingMinutes(a,d)+pos*(d.avgMin||20))+' min.'; extra='<div class="row"><button class="btn line" data-act="cancel" data-id="'+o.id+'">Leave the line</button></div>';}
+      else if(o.status==='done'){badge='done';label='Delivered';status='Delivered by '+esc(o.claimedBy)+'. Thanks for ordering!';}
+      else if(o.status==='declined'){badge='cancelled';label='Declined';status='Sorry, no driver could deliver to that address.';}
+      else{badge='cancelled';label='Cancelled';status='This order was cancelled.';}
+      if(o.status==='active'||o.status==='queued'||o.status==='pool'||o.status==='review'){
+        pay='<p class="meta">Payment (Apple Pay only): I\u2019ll send a request to '+esc(o.phone)+' for your items. Delivery fee '+feeText(o)+'.</p>';
+      }
+      return '<div class="card"><div class="order-top"><h3>Order #'+o.id+' from '+esc(pickupLabel(o))+'</h3><span class="badge '+badge+'">'+label+'</span></div>'+
+        '<p class="meta">Drop-off: '+esc(o.address)+(o.unit?', '+esc(o.unit):'')+'</p>'+pay+'<p style="margin:8px 0 0">'+status+'</p>'+extra+'</div>';
+    }).join('');
+  }
+  function renderOrderView(){renderNoDriversBanner();renderOrderLists();renderStrip();renderConfirm();renderSent();renderMine();}
+
+  // ---------- driver create / login ----------
+  function renderCreateSchedule(){$('#createSchedule').innerHTML=scheduleRowsHtml('c',freshSchedule());bindScheduleToggles($('#createSchedule'));}
+
+  // ---------- rider (driver dashboard) ----------
+  function renderRiderStrip(){
+    var d=currentDriver(); if(!d) return;
+    var el=$('#riderStrip'); var cls,text;
+    if(!d.online){cls='off';text='You\u2019re marked offline. Flip "Taking orders" on when you\u2019re ready.';}
+    else{
+      var a=activeOrderFor(d.name), q=queueFor(d.name).length;
+      if(!a){cls='free';text='You\u2019re online and free. New orders and requests will show up below.';}
+      else{cls='busy';text='On a delivery. '+(q? q+(q===1?' order':' orders')+' waiting behind it.':'Nobody waiting behind it.');}
+    }
+    el.className='strip '+cls; el.innerHTML='<span class="lamp"></span><span>'+text+'</span>';
+  }
+  function renderRiderSettings(){
+    var d=currentDriver(); if(!d) return;
+    $('#onlineToggle').checked=d.online;
+    if(document.activeElement!==$('#feeInput')) $('#feeInput').value=d.fee;
+    if(document.activeElement!==$('#avgInput')) $('#avgInput').value=d.avgMin;
+    $('#riderSchedule').innerHTML=scheduleRowsHtml('r',d.schedule);
+    bindScheduleToggles($('#riderSchedule'));
+  }
+  function renderRiderLists(){
+    var d=currentDriver(); if(!d) return;
+    $('#centerChips').innerHTML=d.centers.length ? d.centers.map(function(c,i){return '<span class="chip">'+esc(c)+'<button type="button" aria-label="Remove '+esc(c)+'" data-act="delCenter" data-i="'+i+'">\u00d7</button></span>';}).join('') : '<p class="empty">Add the shopping centers you pick up from.</p>';
+    $('#areaChips').innerHTML=d.areas.length ? d.areas.map(function(a,i){return '<span class="chip">'+esc(a)+'<button type="button" aria-label="Remove '+esc(a)+'" data-act="delArea" data-i="'+i+'">\u00d7</button></span>';}).join('') : '<p class="empty">No limit set \u2014 you\u2019ll be shown for any neighborhood.</p>';
+    $('#okHint').hidden=!d.okAddrs.length;
+    $('#okChips').innerHTML=d.okAddrs.map(function(a,i){return '<span class="chip">'+esc(a)+'<button type="button" aria-label="Remove '+esc(a)+'" data-act="delOk" data-i="'+i+'">\u00d7</button></span>';}).join('');
+  }
+  function renderReviews(){
+    var d=currentDriver(); if(!d) return;
+    var rv=reviewFor(d);
+    $('#reviews').innerHTML=rv.length ? rv.map(function(o){
+      return '<div style="margin-bottom:18px"><div class="order-top"><h3>'+esc(o.name)+' from '+esc(pickupLabel(o))+'</h3><span class="badge queued">Outside listed areas</span></div>'+
+        '<div class="meta">Order:'+itemsHtml(o)+'</div><p class="meta">Address: '+esc(o.address)+(o.unit?', '+esc(o.unit):'')+'</p>'+
+        '<div class="row"><button class="btn primary" data-act="approve" data-id="'+o.id+'">I can deliver here</button>'+
+        '<a class="btn line" target="_blank" rel="noopener" href="'+esc(mapsUrl(o.address))+'">Check on map</a>'+
+        '<button class="btn danger" data-act="decline" data-id="'+o.id+'">Decline</button></div></div>';
+    }).join('') : '<p class="empty">No address requests.</p>';
+  }
+  function renderPool(){
+    var d=currentDriver(); if(!d) return;
+    var p=poolFor(d);
+    $('#pool').innerHTML=p.length ? p.map(function(o){
+      return '<div style="margin-bottom:18px"><div class="order-top"><h3>'+esc(o.name)+' from '+esc(pickupLabel(o))+'</h3></div>'+
+        '<div class="meta">Order:'+itemsHtml(o)+'</div><p class="meta">Drop-off: '+esc(o.address)+(o.unit?', '+esc(o.unit):'')+' ('+esc(o.hood)+')</p>'+
+        '<div class="row"><button class="btn primary" data-act="claim" data-id="'+o.id+'">Take this order</button></div></div>';
+    }).join('') : '<p class="empty">No orders waiting right now.</p>';
+  }
+  function renderNowAndQueue(){
+    var d=currentDriver(); if(!d) return;
+    var a=activeOrderFor(d.name);
+    $('#now').innerHTML = a ?
+      '<div class="order-top"><h3>Order #'+a.id+' for '+esc(a.name)+'</h3><span class="badge active">'+(a.stage==='pickup'?'Pick up':'Deliver')+'</span></div>'+
+      '<p class="meta">Pick up at: '+esc(pickupLabel(a))+'</p><div class="meta">Items:'+itemsHtml(a)+'</div><p class="meta">If out of stock: '+esc(a.sub||'Text me first')+'</p>'+
+      '<p class="meta">Drop-off: '+esc(a.address)+(a.unit?', '+esc(a.unit):'')+'</p><p class="meta">Phone: '+esc(a.phone)+'</p>'+
+      '<p class="meta">Items payment: '+(a.paid?'received':'not received yet')+'. Delivery fee '+feeText(a)+'.</p>'+
+      (!a.paid&&a.stage==='pickup'?'<p class="warnbox">Wait for the Apple Pay for the items before you buy anything.</p>':'')+
+      '<div class="row">'+(a.stage==='pickup'?'<button class="btn primary" data-act="picked">Picked up</button>':'<button class="btn primary" data-act="delivered">Delivered</button>')+
+      '<button class="btn line" data-act="togglePaid" data-id="'+a.id+'">'+(a.paid?'Items paid \u2713':'Mark items paid')+'</button>'+
+      '<a class="btn line" target="_blank" rel="noopener" href="'+esc(mapsUrl(a.stage==='pickup'?pickupQuery(a):a.address))+'">Open in Maps</a>'+
+      '<button class="btn danger" data-act="cancel" data-id="'+a.id+'">Cancel</button></div>'
+      : '<p class="empty">'+(currentDriver().online?'No active order. The next one you take starts right away.':'You\u2019re offline. Switch on "Taking orders" to accept orders.')+'</p>';
+    var q=queueFor(d.name);
+    $('#queue').innerHTML = q.length ?
+      '<ol style="margin:0;padding-left:20px">'+q.map(function(o){
+        return '<li style="margin-bottom:14px"><h3>'+esc(o.name)+' from '+esc(pickupLabel(o))+'</h3><div class="meta">Items:'+itemsHtml(o)+'</div><p class="meta">Drop-off: '+esc(o.address)+'</p>'+
+          '<div class="row"><button class="btn danger" data-act="cancel" data-id="'+o.id+'">Remove</button></div></li>';
+      }).join('')+'</ol>' : '<p class="empty">Nobody waiting.</p>';
+    var done=S.orders.filter(function(o){return o.claimedBy===d.name&&o.status==='done';});
+    var fees=done.reduce(function(s,o){return s+(o.fee||0);},0);
+    $('#stats').innerHTML='<div><b>'+done.length+'</b><span>Delivered</span></div><div><b>'+money(fees)+'</b><span>Delivery fees</span></div>';
+  }
+  function renderRider(){
+    if(!currentDriver()) return;
+    renderRiderStrip(); renderRiderSettings(); renderRiderLists(); renderReviews(); renderPool(); renderNowAndQueue();
+  }
+
+  function renderAll(){
+    var loggedIn=!!currentDriver();
+    if(loggedIn) renderRider(); else if(view==='order') renderOrderView();
+  }
+
+  // ---------- events: nav ----------
+  document.addEventListener('click',function(e){
+    var nb=e.target.closest('[data-view]');
+    if(nb){setView(nb.getAttribute('data-view'));return;}
+    if(e.target.closest('#brandBtn')){ if(!currentDriver()) setView('order'); return; }
+
+    var b=e.target.closest('[data-act]'); if(!b) return;
+    var act=b.getAttribute('data-act'), id=Number(b.getAttribute('data-id'));
+
+    if(act==='logout'){S.session=null;save();setView('order');return;}
+    if(act==='addItem'){addItemRow();return;}
+    if(act==='removeItem'){if(document.querySelectorAll('#itemRows .item').length>1){b.closest('.item').remove();renumberItems();}return;}
+    if(act==='dismissSent'){sentId=null;renderSent();return;}
+
+    if(act==='confirmAddr'&&confirming){
+      var c=confirming; confirming=null; renderConfirm();
+      c.id=S.nextOrderId++;
+      c.status = c.hood==='__other' ? 'review' : 'pool';
+      c.claimedBy=null; c.fee=null; c.paid=false; c.declinedBy=[]; c.createdAt=Date.now();
+      S.orders.push(c); S.mineIds.push(c.id); sentId=c.id;
+      $('#orderForm').reset(); resetItems();
+      save(); renderOrderView();
+      $('#sent').scrollIntoView({behavior:'smooth',block:'start'});
+      toast(c.status==='review'?'Request sent.':'Order sent. Waiting for a driver.');
+      return;
+    }
+    if(act==='editAddr'){confirming=null;renderConfirm();$('#f-address').focus();return;}
+    if(act==='cancel'){
+      var o=S.orders.find(function(x){return x.id===id;});
+      if(o){var wasActive=o.status==='active'&&o.claimedBy; o.status='cancelled'; if(wasActive) promote(S.drivers[wasActive]);}
+      save(); renderAll(); return;
+    }
+
+    // driver-only actions
+    var d=currentDriver(); if(!d) return;
+    if(act==='addCenter'){var v=$('#newCenter').value.trim(); if(v && d.centers.every(function(x){return x.toLowerCase()!==v.toLowerCase();})){d.centers.push(v);} $('#newCenter').value=''; save(); renderRider(); return;}
+    if(act==='delCenter'){d.centers.splice(Number(b.getAttribute('data-i')),1); save(); renderRider(); return;}
+    if(act==='addArea'){var w=$('#newArea').value.trim(); if(w && d.areas.every(function(x){return x.toLowerCase()!==w.toLowerCase();})){d.areas.push(w);} $('#newArea').value=''; save(); renderRider(); return;}
+    if(act==='delArea'){d.areas.splice(Number(b.getAttribute('data-i')),1); save(); renderRider(); return;}
+    if(act==='delOk'){d.okAddrs.splice(Number(b.getAttribute('data-i')),1); save(); renderRiderLists(); return;}
+    if(act==='clearAddrs'){S.addrs=[]; save(); toast('Saved addresses cleared.'); return;}
+    if(act==='saveSchedule'){d.schedule=readSchedule('r',$('#riderSchedule')); save(); renderRiderStrip(); toast('Hours saved.'); return;}
+    if(act==='claim'){
+      var po=S.orders.find(function(x){return x.id===id;});
+      if(po && !po.claimedBy){claim(po,d); toast('Order added to your '+(po.status==='active'?'current delivery':'line')+'.');}
+      save(); renderRider(); return;
+    }
+    if(act==='approve'){
+      var ro=S.orders.find(function(x){return x.id===id;});
+      if(ro && ro.status==='review'){addUnique(d.okAddrs,ro.address); claim(ro,d); toast('Approved and added to your orders.');}
+      save(); renderRider(); return;
+    }
+    if(act==='decline'){
+      var rd=S.orders.find(function(x){return x.id===id;});
+      if(rd){rd.declinedBy=rd.declinedBy||[]; if(rd.declinedBy.indexOf(d.name)<0) rd.declinedBy.push(d.name); toast('Declined.');}
+      save(); renderRider(); return;
+    }
+    if(act==='togglePaid'){var to=S.orders.find(function(x){return x.id===id;}); if(to) to.paid=!to.paid; save(); renderRider(); return;}
+    if(act==='picked'){var a=activeOrderFor(d.name); if(a) a.stage='onway'; save(); renderRider(); return;}
+    if(act==='delivered'){var a2=activeOrderFor(d.name); if(a2){a2.status='done'; promote(d); toast('Delivered. Nice work!');} save(); renderRider(); return;}
+    if(act==='resetAll'){ if(confirm('This clears every driver account and order on this device. Continue?')){S=fresh(); save(); setView('order');} return; }
+  });
+
+  // ---------- order form ----------
+  $('#f-center').addEventListener('change',function(){renderOrderLists();renderStrip();});
+  $('#f-hood').addEventListener('change',function(){renderOrderLists();renderStrip();});
+
+  $('#orderForm').addEventListener('submit',function(e){
+    e.preventDefault();
+    var form=e.target, bad=validateOrderForm(form);
+    if(bad){showFormError('#formError','Fill in the highlighted fields before placing your order.',bad);return;}
+    $('#formError').hidden=true;
+    var f=new FormData(form);
+    var o={
+      name:f.get('name').trim(), center:f.get('center').trim(), place:f.get('place').trim(),
+      itemLines:readItems(form), items:readItems(form).join('; '), sub:(f.get('sub')||'Text me first'),
+      hood:(f.get('hood')||'').trim(), address:f.get('address').trim(), unit:(f.get('unit')||'').trim(),
+      note:(f.get('note')||'').trim(), phone:(f.get('phone')||'').trim(), feeWhen:(f.get('feeWhen')||'now')
+    };
+    if(eligibleDrivers(o.center,null).length===0){showFormError('#formError','No drivers currently pick up from that shopping center.',$('#f-center'));return;}
+    if(!phoneOk(o.phone)){showFormError('#formError','Enter a phone number with area code so a driver can send the Apple Pay request.',$('#f-phone'));return;}
+    confirming=o; renderConfirm();
+    $('#confirm').scrollIntoView({behavior:'smooth',block:'start'});
+  });
+
+  // ---------- create account ----------
+  $('#createForm').addEventListener('submit',function(e){
+    e.preventDefault();
+    var form=e.target, err=$('#createError');
+    var name=$('#c-name').value.trim(), pass=$('#c-pass').value;
+    err.hidden=true;
+    if(!name){err.hidden=false; err.textContent='Enter your name.'; $('#c-name').focus(); return;}
+    if(S.drivers[name.toLowerCase()]){err.hidden=false; err.textContent='That name is taken. Try adding a last initial.'; $('#c-name').focus(); return;}
+    if(pass.length<4){err.hidden=false; err.textContent='Password needs to be at least 4 characters.'; $('#c-pass').focus(); return;}
+    var schedule=readSchedule('c',$('#createSchedule'));
+    var id=name.toLowerCase();
+    S.drivers[id]={name:name,password:pass,schedule:schedule,online:false,fee:3,avgMin:20,centers:[],areas:[],okAddrs:[]};
+    S.session=id; save();
+    form.reset(); renderCreateSchedule();
+    toast('Account created. Add your pickup centers and neighborhoods below.');
+    setView('rider');
+  });
+
+  // ---------- login ----------
+  $('#loginForm').addEventListener('submit',function(e){
+    e.preventDefault();
+    var name=$('#l-name').value.trim(), pass=$('#l-pass').value, err=$('#loginError');
+    var id=name.toLowerCase(), d=S.drivers[id];
+    err.hidden=true;
+    if(!d || d.password!==pass){err.hidden=false; err.textContent='Name or password doesn\u2019t match. Try again or create an account.'; $('#l-pass').focus(); return;}
+    S.session=id; save(); e.target.reset();
+    setView('rider');
+  });
+
+  // ---------- rider settings inputs ----------
+  $('#onlineToggle').addEventListener('change',function(e){var d=currentDriver(); if(d){d.online=e.target.checked; save(); renderRider();}});
+  $('#feeInput').addEventListener('change',function(e){var d=currentDriver(); if(!d) return; var v=parseFloat(e.target.value); d.fee=isNaN(v)||v<0?d.fee:v; save(); renderRiderSettings();});
+  $('#avgInput').addEventListener('change',function(e){var d=currentDriver(); if(!d) return; var v=parseInt(e.target.value,10); d.avgMin=isNaN(v)||v<5?d.avgMin:v; save(); renderRiderSettings();});
+  $('#f-address').addEventListener('input',function(){$('#formError').hidden=true;});
+
+  setInterval(function(){renderAll();},30000);
+
+  // ---------- init ----------
+  resetItems();
+  renderCreateSchedule();
+  setView(currentDriver() ? 'rider' : 'order');
+})();
+</script>
+</body>
+</html>
