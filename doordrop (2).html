@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DoorDrop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#081A33; --surface:#0F2847; --ink:#EAF4FF; --muted:#9DB4D0; --line:#264A75; --card-line:rgba(127,255,212,.24);
+  --brand:#7FFFD4; --brand-ink:#081A33;
+  --accent:#7FFFD4; --focus:#7FFFD4;
+  --hdr:#143B70; --hdr-muted:#B4C8E2;
+  --ok:#7FFFD4; --ok-bg:#0C3F44; --warn:#F5C25B; --warn-bg:#3A2C0B; --bad:#FF8B7E; --bad-bg:#40191A; --off:#A9BBD1; --off-bg:#1A3557;
+  --head:'Bricolage Grotesque','Trebuchet MS',system-ui,sans-serif;
+  --body:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:dark;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#081A33; --surface:#0F2847; --ink:#EAF4FF; --muted:#9DB4D0; --line:#264A75; --card-line:rgba(127,255,212,.24);
+  --brand:#7FFFD4; --brand-ink:#081A33;
+  --accent:#7FFFD4; --focus:#7FFFD4;
+  --hdr:#143B70; --hdr-muted:#B4C8E2;
+  --ok:#7FFFD4; --ok-bg:#0C3F44; --warn:#F5C25B; --warn-bg:#3A2C0B; --bad:#FF8B7E; --bad-bg:#40191A; --off:#A9BBD1; --off-bg:#1A3557;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#081A33; --surface:#0F2847; --ink:#EAF4FF; --muted:#9DB4D0; --line:#264A75; --card-line:rgba(127,255,212,.24);
+  --brand:#7FFFD4; --brand-ink:#081A33;
+  --accent:#7FFFD4; --focus:#7FFFD4;
+  --hdr:#143B70; --hdr-muted:#B4C8E2;
+  --ok:#7FFFD4; --ok-bg:#0C3F44; --warn:#F5C25B; --warn-bg:#3A2C0B; --bad:#FF8B7E; --bad-bg:#40191A; --off:#A9BBD1; --off-bg:#1A3557;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);-webkit-text-size-adjust:100%}
+.wrap{max-width:640px;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px;padding:18px 20px;background:var(--hdr);border-radius:18px}
+.brandrow{display:flex;align-items:center;gap:10px}
+.brandrow svg{flex:none}
+h1{font:800 clamp(32px,8vw,42px)/1 var(--head);letter-spacing:-.02em;margin:0;color:var(--accent)}
+.tag{margin:8px 0 0;color:var(--hdr-muted);font-size:15px;max-width:34ch}
+h2{font:600 20px/1.2 var(--head);margin:0 0 12px}
+h3{font:600 17px/1.25 var(--head);margin:0}
+.tabs{display:inline-flex;background:rgba(255,255,255,.1);border-radius:999px;padding:3px}
+.tabs button{border:0;background:transparent;color:var(--hdr-muted);font:500 15px var(--body);padding:8px 16px;border-radius:999px;cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--accent);color:#0A1F3D;font-weight:700}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+header button:focus-visible{outline-color:var(--accent)}
+
+.strip{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;border-radius:14px;margin-bottom:16px;font-size:15px}
+.strip strong{font-weight:700}
+.strip .lamp{width:12px;height:12px;border-radius:50%;background:currentColor;flex:none}
+.strip.free{background:var(--ok-bg);color:var(--ok)}
+.strip.busy{background:var(--warn-bg);color:var(--warn)}
+.strip.off{background:var(--off-bg);color:var(--off)}
+
+.card{background:var(--surface);border:1px solid var(--card-line);border-radius:14px;padding:16px;margin-bottom:16px}
+label{display:block;font-weight:500;font-size:14px;margin:12px 0 4px}
+input[type=text],input[type=number],input[type=tel],textarea,select{width:100%;font:16px var(--body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+textarea{min-height:76px;resize:vertical}
+.hint{color:var(--muted);font-size:13px;margin:8px 0 0}
+.btn{font:700 15px var(--body);border-radius:10px;padding:11px 16px;border:1px solid transparent;cursor:pointer}
+.btn.primary{background:var(--brand);color:var(--brand-ink)}
+.btn.line{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.danger{background:transparent;color:var(--bad);border-color:var(--line)}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.full{width:100%;margin-top:16px}
+
+.decision{border:2px solid var(--warn);background:var(--surface)}
+.decision.good{border-color:var(--ok)}
+.decision p{margin:8px 0 0}
+
+.badge{display:inline-block;font-size:13px;font-weight:700;border-radius:999px;padding:2px 10px}
+.badge.active{background:var(--ok-bg);color:var(--ok)}
+.badge.queued{background:var(--warn-bg);color:var(--warn)}
+.badge.done{background:var(--off-bg);color:var(--off)}
+.badge.cancelled{background:var(--bad-bg);color:var(--bad)}
+.order-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.meta{color:var(--muted);font-size:14px;margin:2px 0}
+.empty{color:var(--muted);margin:0}
+
+.track{list-style:none;margin:0;padding:0}
+.track li{position:relative;padding:0 0 18px 46px}
+.track li:last-child{padding-bottom:0}
+.track li::before{content:"";position:absolute;left:15px;top:32px;bottom:0;border-left:2px dashed var(--line)}
+.track li:last-child::before{display:none}
+.stop{position:absolute;left:0;top:0;width:32px;height:32px;border-radius:50%;background:var(--warn-bg);color:var(--warn);font:700 15px var(--head);display:grid;place-items:center}
+
+.settings{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.switch{display:flex;align-items:center;gap:10px;font-weight:500;margin:0}
+.switch input{width:22px;height:22px;accent-color:var(--brand)}
+.stats{display:flex;gap:24px;flex-wrap:wrap}
+.stats div{min-width:110px}
+.stats b{display:block;font:800 30px/1.1 var(--head)}
+.stats span{color:var(--muted);font-size:14px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--accent);color:var(--bg);font-weight:500;padding:10px 16px;border-radius:10px;font-size:14px;max-width:90%;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.show{opacity:1}
+.paybox{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:16px}
+.paybox p{margin:6px 0 0}
+fieldset{border:0;padding:0;margin:14px 0 0}
+legend{font-weight:500;font-size:14px;padding:0}
+.opt{display:flex;align-items:center;gap:10px;font-weight:400;font-size:15px;margin:8px 0 0}
+.opt input{width:20px;height:20px;accent-color:var(--brand);flex:none}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:12px}
+.item-top{display:flex;justify-content:space-between;align-items:center}
+.item .fl{display:block;font-weight:500;font-size:14px;margin:10px 0 0}
+.item .fl input{margin-top:4px;font-weight:400}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.small{padding:6px 12px;font-size:14px}
+ul.items{margin:4px 0 0 18px;padding:0}
+input:invalid, select:invalid, textarea:invalid{box-shadow:none}
+.field-err input, .field-err select, .field-err textarea{border-color:var(--bad)}
+.err{color:var(--bad);font-size:14px;font-weight:500;margin:6px 0 0}
+a.btn{display:inline-block;text-decoration:none;text-align:center}
+.warnbox{background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:8px 12px;font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:4px 6px 4px 12px;font-size:14px}
+.chip button{border:0;background:transparent;color:var(--muted);font-size:18px;line-height:1;cursor:pointer;padding:2px 6px}
+.inline{display:flex;gap:8px}
+.inline input{flex:1}
+.foot{color:var(--muted);font-size:13px;margin-top:24px}
+[hidden]{display:none !important}
+@media (prefers-reduced-motion:reduce){#toast{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="brandrow"><svg viewBox="0 0 24 24" width="34" height="34" aria-hidden="true"><path d="M12 1.5C12 1.5 4.5 10 4.5 15.2a7.5 7.5 0 0015 0C19.5 10 12 1.5 12 1.5z" fill="#7FFFD4"/><path d="M8.6 15.4l2.4 2.4 4.6-5" stroke="#0A1F3D" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><h1>DoorDrop</h1></div>
+      <p class="tag">Neighborhood delivery by ebike. Lower fees, one order at a time.</p>
+    </div>
+    <div class="tabs" role="group" aria-label="Switch view">
+      <button type="button" data-tab="order" aria-pressed="true">Order</button>
+      <button type="button" data-tab="rider" aria-pressed="false">Rider view</button>
+    </div>
+  </header>
+
+  <div id="strip" class="strip" role="status"></div>
+
+  <section id="view-order">
+    <div id="sent"></div>
+    <div id="confirm"></div>
+    <div id="decision"></div>
+
+    <form id="orderForm" class="card" autocomplete="off" novalidate>
+      <h2>Place an order</h2>
+      <p class="err" id="formError" role="alert" hidden></p>
+      <label for="f-name">Your name</label>
+      <input id="f-name" name="name" type="text" required maxlength="40">
+      <label for="f-center">Which shopping center?</label>
+      <select id="f-center" name="center" required></select>
+      <p class="hint" id="centerHint"></p>
+      <label for="f-place">Which shop or restaurant there?</label>
+      <input id="f-place" name="place" type="text" required maxlength="60" list="placeList" placeholder="Shop or restaurant name">
+      <datalist id="placeList"></datalist>
+      <h3 style="margin-top:18px">What do you want?</h3>
+      <p class="hint">Be as specific as you can: brand, size, flavor or type, and how many.</p>
+      <div id="itemRows"></div>
+      <button type="button" class="btn line" data-act="addItem" style="margin-top:12px">Add another item</button>
+      <label for="f-sub">If they&rsquo;re out of something</label>
+      <select id="f-sub" name="sub"><option>Text me first</option><option>Get the closest match</option><option>Skip it</option></select>
+      <div id="hoodWrap">
+        <label for="f-hood">Neighborhood</label>
+        <select id="f-hood" name="hood" required></select>
+      </div>
+      <label for="f-address">Drop-off address</label>
+      <input id="f-address" name="address" type="text" required maxlength="80" list="addrList" placeholder="House number and street">
+      <datalist id="addrList"></datalist>
+      <p class="hint" id="areaHint" hidden></p>
+      <p class="err" id="addrError" role="alert" hidden></p>
+      <button type="button" class="btn line" id="askBtn" data-act="askRange" hidden style="margin-top:8px">Ask if I can deliver here</button>
+      <p class="hint">Start typing to pick an address you&rsquo;ve used before. You&rsquo;ll get a chance to double-check it before the order is sent.</p>
+      <label for="f-unit">Apartment, gate code, or meeting spot (optional)</label>
+      <input id="f-unit" name="unit" type="text" maxlength="60">
+      <label for="f-note">Anything else? (optional)</label>
+      <input id="f-note" name="note" type="text" maxlength="100">
+      <div class="paybox">
+        <h3>Payment</h3>
+        <p>I only take Apple Pay. I&rsquo;ll send an Apple Pay request to your phone number for your items, so I can buy them.</p>
+        <label for="f-phone">Your phone number</label>
+        <input id="f-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required maxlength="20" placeholder="(555) 555-5555">
+        <fieldset>
+          <legend id="feeLegend">Delivery fee</legend>
+          <label class="opt"><input type="radio" name="feeWhen" value="now" checked> Pay it with my items</label>
+          <label class="opt"><input type="radio" name="feeWhen" value="delivery"> Pay it when you deliver</label>
+        </fieldset>
+      </div>
+      <p class="hint" id="feeHint"></p>
+      <p class="hint">Food and everyday items only. No alcohol, tobacco, or vapes.</p>
+      <button class="btn primary full" type="submit">Place order</button>
+    </form>
+
+    <h2>Your orders</h2>
+    <div id="mine"></div>
+  </section>
+
+  <section id="view-rider" hidden>
+    <div class="card">
+      <h2>Settings</h2>
+      <label class="switch"><input id="onlineToggle" type="checkbox"> Taking orders</label>
+      <div class="settings">
+        <div>
+          <label for="feeInput">Delivery fee ($)</label>
+          <input id="feeInput" type="number" min="0" step="0.5">
+        </div>
+        <div>
+          <label for="avgInput">Minutes per delivery</label>
+          <input id="avgInput" type="number" min="5" step="5">
+        </div>
+      </div>
+      <p class="hint">Minutes per delivery is how DoorDrop estimates waits for people in line.</p>
+      <label for="riderPhone">My phone number for order texts</label>
+      <input id="riderPhone" type="tel" inputmode="tel" maxlength="20" placeholder="(555) 555-5555">
+      <p class="hint">After someone orders, they see this number and a Copy button with the full order to paste into a text. To change the number, ask Claude to update the page.</p>
+    </div>
+
+    <div class="card">
+      <h2>Neighborhoods I deliver to</h2>
+      <div class="inline"><input id="newArea" type="text" maxlength="40" placeholder="Neighborhood name" aria-label="New neighborhood"><button class="btn line" data-act="addArea">Add</button></div>
+      <div id="areaChips" class="chips"></div>
+      <p class="hint" id="okHint" hidden>Approved by request:</p>
+      <div id="okChips" class="chips"></div>
+      <p class="hint">Customers pick one of these neighborhoods. Anyone else can send a request for you to approve. Leave it empty to accept any address.</p>
+    </div>
+
+    <div class="card">
+      <h2>Shopping centers I pick up from</h2>
+      <div class="inline"><input id="newPlace" type="text" maxlength="60" placeholder="Shopping center name" aria-label="New shopping center"><button class="btn line" data-act="addCenter">Add</button></div>
+      <div id="centerChips" class="chips"></div>
+      <p class="hint">Customers can only choose a pickup from these shopping centers.</p>
+      <div class="row"><button class="btn line" data-act="clearAddrs">Clear saved addresses</button></div>
+    </div>
+
+    <h2>Address requests</h2>
+    <div id="reviews" class="card"></div>
+
+    <h2>Now delivering</h2>
+    <div id="now" class="card"></div>
+
+    <h2>Waiting in line</h2>
+    <div id="queue" class="card"></div>
+
+    <div class="card">
+      <div id="stats" class="stats"></div>
+      <div class="row">
+        <button class="btn line" data-act="clear">Clear finished orders</button>
+        <button class="btn danger" data-act="reset">Reset demo</button>
+      </div>
+    </div>
+  </section>
+
+  <p class="foot">Prototype: orders are saved in this browser only. Open the Order and Rider views in two tabs on one device to try the full flow.</p>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  var KEY='doordrop-v1';
+  var OWNER_PHONE='+18588883162';
+  var DEFAULT_AREAS=['4S Ranch','Del Sur'];
+  var DEFAULT_CENTERS=['4S Commons Town Center','Del Sur Town Center','4S Ranch Village Center'];
+  function fresh(){return {online:true,fee:3,avgMin:20,orders:[],nextId:1,mine:[],addrs:[],places:[],areas:DEFAULT_AREAS.slice(),okAddrs:[],centers:DEFAULT_CENTERS.slice(),v2:true,riderPhone:''};}
+  function load(){
+    try{var r=localStorage.getItem(KEY); if(r){var p=JSON.parse(r); if(p&&p.orders){p.addrs=p.addrs||[];p.places=p.places||[];p.areas=p.areas||[];p.okAddrs=p.okAddrs||[];p.centers=p.centers||DEFAULT_CENTERS.slice();if(!p.v2){p.areas=DEFAULT_AREAS.slice();p.v2=true;}return p;}}}catch(e){}
+    return fresh();
+  }
+  var S=load(), pending=null, confirming=null, sentId=null, toastTimer=null;
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+  function $(s){return document.querySelector(s);}
+  function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function money(n){return '$'+Number(n).toFixed(2);}
+  function active(){return S.orders.find(function(o){return o.status==='active';});}
+  function queued(){return S.orders.filter(function(o){return o.status==='queued';});}
+  function remaining(a){
+    if(!a) return 0;
+    var used=Math.floor((Date.now()-a.startedAt)/60000);
+    return Math.max(5,S.avgMin-used);
+  }
+  function freeIn(){var a=active(); return a? remaining(a)+queued().length*S.avgMin : 0;}
+  function promote(){
+    if(active()) return;
+    var n=queued()[0];
+    if(n){n.status='active';n.stage='pickup';n.startedAt=Date.now();}
+  }
+  function toast(msg){
+    var t=$('#toast'); t.textContent=msg; t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer=setTimeout(function(){t.classList.remove('show');},3200);
+  }
+
+  function mapsUrl(q){return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);}
+  function riderNumber(){return (OWNER_PHONE||S.riderPhone||'').replace(/[^\d+]/g,'');}
+  function itemsHtml(o){
+    if(o.itemLines&&o.itemLines.length) return '<ul class="items">'+o.itemLines.map(function(l){return '<li>'+esc(l)+'</li>';}).join('')+'</ul>';
+    return ' '+esc(o.items||'');
+  }
+  function orderText(o){
+    var L=[];
+    L.push((o.status==='review'?'DoorDrop address request':'New DoorDrop order')+' #'+o.id);
+    L.push('Name: '+o.name);
+    L.push('Phone: '+o.phone);
+    L.push('Pickup: '+pickupLabel(o));
+    L.push('Items:');
+    (o.itemLines&&o.itemLines.length?o.itemLines:[o.items]).forEach(function(l){L.push('- '+l);});
+    L.push('If out of stock: '+(o.sub||'Text me first'));
+    L.push('Drop-off: '+o.address+(o.unit?', '+o.unit:'')+(o.hood&&o.hood!=='__other'?' ('+o.hood+')':' (outside my area)'));
+    L.push('Payment: Apple Pay. Delivery fee '+feeText(o));
+    if(o.note) L.push('Note: '+o.note);
+    return L.join('\n');
+  }
+  function smsHref(o){return 'sms:'+riderNumber()+'?&body='+encodeURIComponent(orderText(o));}
+  function fmtPhone(n){
+    var d=String(n).replace(/\D/g,'');
+    if(d.length===11&&d.charAt(0)==='1') d=d.slice(1);
+    return d.length===10 ? '('+d.slice(0,3)+') '+d.slice(3,6)+'-'+d.slice(6) : n;
+  }
+  function copyText(t){
+    return new Promise(function(res,rej){
+      function fallback(){
+        var ta=$('#orderTextBox'); if(!ta){rej();return;}
+        ta.removeAttribute('readonly'); ta.focus(); ta.select();
+        try{ta.setSelectionRange(0,ta.value.length);}catch(e){}
+        var ok=false; try{ok=document.execCommand('copy');}catch(e){}
+        ta.setAttribute('readonly',''); if(ok) res(); else rej();
+      }
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(res,fallback);}
+      else fallback();
+    });
+  }
+  function renderSent(){
+    var el=$('#sent');
+    var o=sentId&&S.orders.find(function(x){return x.id===sentId;});
+    if(!o){el.innerHTML='';return;}
+    var num=riderNumber();
+    el.innerHTML='<div class="card decision good"><h3>'+(num?(o.status==='review'?'Almost done: text me your request':'Almost done: text me your order'):(o.status==='review'?'Request sent':'Order placed'))+'</h3>'+
+      (num
+        ? '<p>Send me the details so I see your order right away. Tap <strong>Copy order</strong>, then paste it in a text to <strong>'+esc(fmtPhone(num))+'</strong>.</p>'+
+          '<p class="warnbox">Important: I won\u2019t get your order unless you send this text.</p>'+
+          '<textarea id="orderTextBox" readonly rows="9" style="margin-top:8px">'+esc(orderText(o))+'</textarea>'
+        : '<p>I\u2019ll see your order in my Rider view.</p>')+
+      '<div class="row">'+(num?'<button class="btn primary" data-act="copyOrder">Copy order</button>'+(navigator.share?'<button class="btn line" data-act="shareOrder">Share</button>':''):'')+
+      '<button class="btn line" data-act="dismissSent">Done</button></div></div>';
+  }
+  function itemRowHtml(){
+    return '<div class="item"><div class="item-top"><strong class="item-title">Item</strong><button type="button" class="btn line small" data-act="removeItem">Remove</button></div>'+
+      '<label class="fl">What is it?<input name="iname" type="text" required maxlength="60" placeholder="e.g. Greek yogurt"></label>'+
+      '<div class="two"><label class="fl">Brand<input name="ibrand" type="text" maxlength="40" placeholder="e.g. Chobani"></label>'+
+      '<label class="fl">Size or amount<input name="isize" type="text" maxlength="30" placeholder="e.g. 32 oz"></label></div>'+
+      '<div class="two"><label class="fl">Flavor, color, or type<input name="itype" type="text" maxlength="40" placeholder="e.g. vanilla, low fat"></label>'+
+      '<label class="fl">How many<input name="iqty" type="number" min="1" max="20" value="1"></label></div>'+
+      '<label class="fl">Anything else about this item?<input name="inote" type="text" maxlength="80"></label></div>';
+  }
+  function renumberItems(){
+    var rows=document.querySelectorAll('#itemRows .item');
+    rows.forEach(function(r,i){r.querySelector('.item-title').textContent='Item '+(i+1);});
+    rows.forEach(function(r){r.querySelector('[data-act="removeItem"]').hidden=rows.length<2;});
+  }
+  function addItemRow(){
+    var d=document.createElement('div'); d.innerHTML=itemRowHtml();
+    $('#itemRows').appendChild(d.firstChild); renumberItems();
+  }
+  function resetItems(){$('#itemRows').innerHTML='';addItemRow();}
+  function readItems(form){
+    var lines=[];
+    form.querySelectorAll('.item').forEach(function(r){
+      function v(n){return (r.querySelector('[name="'+n+'"]').value||'').trim();}
+      var name=v('iname'); if(!name) return;
+      var qty=parseInt(v('iqty'),10)||1;
+      var parts=[qty+' \u00d7 '+(v('ibrand')?v('ibrand')+' ':'')+name];
+      [v('itype'),v('isize')].forEach(function(x){if(x) parts.push(x);});
+      if(v('inote')) parts.push('note: '+v('inote'));
+      lines.push(parts.join(', '));
+    });
+    return lines;
+  }
+  function clearFieldErrors(form){
+    form.querySelectorAll('.field-err').forEach(function(el){el.classList.remove('field-err');});
+  }
+  function markFieldError(input){
+    var wrap=input.closest('label')||input.closest('.item')||input;
+    wrap.classList.add('field-err');
+    return input;
+  }
+  function validateOrderForm(form){
+    clearFieldErrors(form);
+    var firstBad=null;
+    form.querySelectorAll('[required]').forEach(function(f){
+      if(f.offsetParent===null) return; // skip hidden fields
+      if(!f.value || !String(f.value).trim()){ if(!firstBad) firstBad=markFieldError(f); else markFieldError(f); }
+    });
+    var hasItem=Array.prototype.some.call(form.querySelectorAll('[name=iname]'),function(f){return f.value.trim();});
+    if(!hasItem){ var firstItem=form.querySelector('[name=iname]'); if(firstItem){markFieldError(firstItem); if(!firstBad) firstBad=firstItem;} }
+    return firstBad;
+  }
+  function showFormError(msg,field){
+    var el=$('#formError'); el.textContent=msg; el.hidden=false;
+    if(field){field.scrollIntoView({behavior:'smooth',block:'center'}); try{field.focus({preventScroll:true});}catch(e){field.focus();}}
+    else el.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+  function phoneOk(v){return String(v).replace(/\D/g,'').length>=10;}
+  function feeText(o){return money(o.fee)+' ('+(o.feeWhen==='delivery'?'pay when I deliver':'pay with the items')+')';}
+  function pickupLabel(o){return o.center ? o.place+' ('+o.center+')' : o.place;}
+  function pickupQuery(o){return o.place+(o.center?' '+o.center:'');}
+  function addUnique(list,val){
+    if(!val) return;
+    var low=val.toLowerCase();
+    if(!list.some(function(x){return x.toLowerCase()===low;})) list.unshift(val);
+    if(list.length>30) list.length=30;
+  }
+  function remember(o){addUnique(S.addrs,o.address);addUnique(S.places,o.place);}
+
+  function renderConfirm(){
+    var el=$('#confirm');
+    if(!confirming){el.innerHTML='';return;}
+    var c=confirming;
+    var warn=/\d/.test(c.address)?'':'<p class="warnbox">This address has no house number. Double-check it so I don\u2019t go to the wrong place.</p>';
+    el.innerHTML='<div class="card decision good"><h3>'+(c.outside?'Is this the right address? I\u2019ll check if I can deliver there.':'Is this the right drop-off spot?')+'</h3>'+
+      '<p><strong>'+esc(c.address)+'</strong>'+(c.hood&&c.hood!=='__other'?', '+esc(c.hood):'')+(c.unit?'<br>'+esc(c.unit):'')+'</p>'+'<p class="meta">Pickup: '+esc(pickupLabel(c))+'</p>'+'<div class="meta">Order:'+itemsHtml(c)+'</div>'+'<p class="meta">Apple Pay request goes to '+esc(c.phone)+'. Delivery fee: '+(c.feeWhen==='delivery'?'pay when I deliver':'pay with your items')+'.</p>'+warn+
+      '<div class="row"><button class="btn primary" data-act="confirmAddr">'+(c.outside?'Yes, send the request':'Yes, that\u2019s right')+'</button>'+
+      '<a class="btn line" target="_blank" rel="noopener" href="'+esc(mapsUrl(c.address))+'">Check on map</a>'+
+      '<button class="btn line" data-act="editAddr">Edit</button></div></div>';
+  }
+
+  function renderLists(){
+    $('#addrList').innerHTML=S.addrs.map(function(a){return '<option value="'+esc(a)+'"></option>';}).join('');
+    $('#placeList').innerHTML=S.places.map(function(a){return '<option value="'+esc(a)+'"></option>';}).join('');
+    var sel=$('#f-center'), cur=sel.value;
+    sel.innerHTML='<option value="">Choose a shopping center</option>'+S.centers.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('');
+    if(S.centers.indexOf(cur)>-1) sel.value=cur;
+    $('#centerHint').textContent=S.centers.length ? 'I pick up from these shopping centers only.' : 'I\u2019m not set up for pickups yet.';
+    $('#centerChips').innerHTML=S.centers.length ? S.centers.map(function(p,i){
+      return '<span class="chip">'+esc(p)+'<button type="button" aria-label="Remove '+esc(p)+'" data-act="delCenter" data-i="'+i+'">\u00d7</button></span>';
+    }).join('') : '<p class="empty">No shopping centers yet. Add the ones you pick up from.</p>';
+  }
+
+  function inArea(o){
+    var low=o.address.trim().toLowerCase();
+    if(S.okAddrs.some(function(x){return x.toLowerCase()===low;})) return true;
+    if(!S.areas.length) return true;
+    return S.areas.indexOf(o.hood)>-1;
+  }
+  function renderAreas(){
+    $('#areaChips').innerHTML=S.areas.length ? S.areas.map(function(p,i){
+      return '<span class="chip">'+esc(p)+'<button type="button" aria-label="Remove '+esc(p)+'" data-act="delArea" data-i="'+i+'">\u00d7</button></span>';
+    }).join('') : '<p class="empty">No limit set. I accept any address.</p>';
+    $('#okHint').hidden=!S.okAddrs.length;
+    $('#okChips').innerHTML=S.okAddrs.map(function(p,i){
+      return '<span class="chip">'+esc(p)+'<button type="button" aria-label="Remove '+esc(p)+'" data-act="delOk" data-i="'+i+'">\u00d7</button></span>';
+    }).join('');
+    var hs=$('#f-hood'), hcur=hs.value;
+    hs.innerHTML='<option value="">Choose your neighborhood</option>'+S.areas.map(function(a){return '<option value="'+esc(a)+'">'+esc(a)+'</option>';}).join('')+'<option value="__other">Somewhere else (ask me)</option>';
+    if(hcur&&(S.areas.indexOf(hcur)>-1||hcur==='__other')) hs.value=hcur;
+    $('#hoodWrap').hidden=!S.areas.length; hs.required=!!S.areas.length;
+    var ah=$('#areaHint');
+    if(S.areas.length){ah.hidden=false;ah.textContent='I deliver to: '+S.areas.join(', ')+'.';}
+    else{ah.hidden=true;}
+  }
+
+  function renderReviews(){
+    var rv=S.orders.filter(function(o){return o.status==='review';});
+    document.querySelector('[data-tab="rider"]').textContent='Rider view'+(rv.length?' ('+rv.length+')':'');
+    $('#reviews').innerHTML=rv.length ? rv.map(function(o){
+      return '<div style="margin-bottom:18px"><div class="order-top"><h3>'+esc(o.name)+' from '+esc(pickupLabel(o))+'</h3><span class="badge queued">Outside my area</span></div>'+
+        '<p class="meta">'+esc(o.items)+'</p><p class="meta">Address: '+esc(o.address)+(o.unit?', '+esc(o.unit):'')+'</p>'+
+        '<div class="row"><button class="btn primary" data-act="approve" data-id="'+o.id+'">I can deliver here</button>'+
+        '<a class="btn line" target="_blank" rel="noopener" href="'+esc(mapsUrl(o.address))+'">Check on map</a>'+
+        '<button class="btn danger" data-act="decline" data-id="'+o.id+'">Decline</button></div></div>';
+    }).join('') : '<p class="empty">No address requests.</p>';
+  }
+
+  function renderStrip(){
+    var a=active(), n=queued().length, cls, label, text;
+    if(!S.online){cls='off';label='Offline';text='Not taking orders right now.';}
+    else if(!a){cls='free';label='Free now';text='Order now and I head out right away.';}
+    else{cls='busy';label='On a delivery';text=(n? n+(n===1?' order':' orders')+' waiting. ':'No one waiting. ')+'I\u2019m free in about '+freeIn()+' min.';}
+    var el=$('#strip'); el.className='strip '+cls;
+    el.innerHTML='<span class="lamp"></span><strong>'+label+'</strong><span>'+text+'</span>';
+    $('#feeLegend').textContent='Delivery fee ('+money(S.fee)+')';
+    $('#feeHint').textContent='Delivery fee: '+money(S.fee)+'. You also pay the shop for your items.';
+  }
+
+  function renderDecision(){
+    var el=$('#decision');
+    if(!pending){el.innerHTML='';return;}
+    var a=active();
+    if(!a){
+      el.innerHTML='<div class="card decision good"><h3>Good news, I\u2019m free now</h3><p>I just finished my last delivery, so I can start yours right away.</p><div class="row"><button class="btn primary" data-act="placeNow">Place order now</button><button class="btn line" data-act="declineJoin">Cancel</button></div></div>';
+      return;
+    }
+    var n=queued().length, pos=n+1, free=freeIn(), eta=free+S.avgMin;
+    el.innerHTML='<div class="card decision"><h3>I\u2019m on another delivery right now</h3>'+
+      '<p>I\u2019m bringing '+esc(a.name)+'\u2019s order from '+esc(pickupLabel(a))+'. I\u2019ll be free in about '+free+' min.</p>'+
+      '<p>If you join the line you\u2019ll be spot #'+pos+', delivered in about '+eta+' min. Or cancel now and check back when I\u2019m free.</p>'+
+      '<div class="row"><button class="btn primary" data-act="join">Join the line (spot #'+pos+')</button><button class="btn line" data-act="declineJoin">Cancel and check back later</button></div></div>';
+  }
+
+  function renderMine(){
+    var list=S.mine.map(function(id){return S.orders.find(function(o){return o.id===id;});}).filter(Boolean).reverse();
+    var el=$('#mine');
+    if(!list.length){el.innerHTML='<p class="empty">Orders you place show up here so you can follow them.</p>';return;}
+    var a=active();
+    el.innerHTML=list.map(function(o){
+      var status, badge, label, extra='', pay='';
+      if(o.status==='active'){
+        badge='active'; label='On it';
+        status=o.stage==='pickup'?'Heading to '+esc(pickupLabel(o))+' to pick this up.':'Picked up and on the way to you.';
+      }else if(o.status==='queued'){
+        var pos=queued().indexOf(o)+1;
+        badge='queued'; label='In line';
+        status='Spot #'+pos+'. Delivered in about '+(remaining(a)+pos*S.avgMin)+' min.';
+        extra='<div class="row"><button class="btn line" data-act="cancel" data-id="'+o.id+'">Leave the line</button></div>';
+      }else if(o.status==='done'){badge='done';label='Delivered';status='Delivered. Thanks for ordering!';}
+      else if(o.status==='review'){badge='queued';label='Checking';status='Waiting for me to check if I deliver to that address.';extra='<div class="row"><button class="btn line" data-act="cancel" data-id="'+o.id+'">Cancel request</button></div>';}
+      else if(o.status==='declined'){badge='cancelled';label='Declined';status='Sorry, I can\u2019t deliver to that address.';}
+      else{badge='cancelled';label='Cancelled';status='This order was cancelled.';}
+      if(o.status==='active'||o.status==='queued'||o.status==='review'){
+        pay='<p class="meta">Payment (Apple Pay only): '+(o.paid?'items paid, thank you. ':'I\u2019ll send a request to '+esc(o.phone||'your phone')+' for your items. ')+'Delivery fee '+esc(feeText(o))+'.</p>';
+      }
+      return '<div class="card"><div class="order-top"><h3>Order #'+o.id+' from '+esc(pickupLabel(o))+'</h3><span class="badge '+badge+'">'+label+'</span></div>'+
+        '<p class="meta">'+esc(o.items)+'</p><p class="meta">Drop-off: '+esc(o.address)+(o.unit?', '+esc(o.unit):'')+'</p>'+pay+'<p style="margin:8px 0 0">'+status+'</p>'+extra+'</div>';
+    }).join('');
+  }
+
+  function renderRider(){
+    var a=active(), q=queued();
+    $('#now').innerHTML = a ?
+      '<div class="order-top"><h3>Order #'+a.id+' for '+esc(a.name)+'</h3><span class="badge active">'+(a.stage==='pickup'?'Pick up':'Deliver')+'</span></div>'+
+      '<p class="meta">Pick up at: '+esc(pickupLabel(a))+'</p><div class="meta">Items:'+itemsHtml(a)+'</div><p class="meta">If out of stock: '+esc(a.sub||'Text me first')+'</p><p class="meta">Drop-off: '+esc(a.address)+'</p>'+
+      (a.unit?'<p class="meta">Unit or gate: '+esc(a.unit)+'</p>':'')+
+      (a.note?'<p class="meta">Note: '+esc(a.note)+'</p>':'')+
+      '<p class="meta">Phone: '+esc(a.phone||'not given')+(a.hood&&a.hood!=='__other'?'. Neighborhood: '+esc(a.hood):'')+'</p>'+
+      '<p class="meta">Items payment: '+(a.paid?'received':'not received yet')+'. Delivery fee '+esc(feeText(a))+'.</p>'+
+      (!a.paid&&a.stage==='pickup'?'<p class="warnbox">Wait for the Apple Pay for the items before you buy anything.</p>':'')+
+      '<div class="row">'+(a.stage==='pickup'?'<button class="btn primary" data-act="picked">Picked up</button>':'<button class="btn primary" data-act="delivered">Delivered</button>')+
+      '<button class="btn line" data-act="togglePaid" data-id="'+a.id+'">'+(a.paid?'Items paid \u2713':'Mark items paid')+'</button>'+
+      '<a class="btn line" target="_blank" rel="noopener" href="'+esc(mapsUrl(a.stage==='pickup'?pickupQuery(a):a.address))+'">Open '+(a.stage==='pickup'?'pickup':'drop-off')+' in Maps</a>'+
+      '<button class="btn danger" data-act="cancel" data-id="'+a.id+'">Cancel this order</button></div>'
+      : '<p class="empty">'+(S.online?'No active order. The next order starts right away.':'You\u2019re offline. Switch on \u201cTaking orders\u201d to accept orders.')+'</p>';
+    $('#queue').innerHTML = q.length ?
+      '<ol class="track">'+q.map(function(o,i){
+        return '<li><span class="stop">'+(i+1)+'</span><div><h3>'+esc(o.name)+' from '+esc(pickupLabel(o))+'</h3><p class="meta">'+esc(o.items)+'</p><p class="meta">Drop-off: '+esc(o.address)+'</p>'+
+          '<div class="row" style="margin-top:8px"><button class="btn danger" data-act="cancel" data-id="'+o.id+'">Remove</button></div></div></li>';
+      }).join('')+'</ol>'
+      : '<p class="empty">Nobody waiting.</p>';
+    var done=S.orders.filter(function(o){return o.status==='done';});
+    var fees=done.reduce(function(s,o){return s+o.fee;},0);
+    $('#stats').innerHTML='<div><b>'+done.length+'</b><span>Delivered</span></div><div><b>'+money(fees)+'</b><span>Delivery fees</span></div>';
+  }
+
+  function syncSettings(){
+    $('#onlineToggle').checked=S.online;
+    var rp=$('#riderPhone'); if(OWNER_PHONE){rp.value='(858) 888-3162';rp.readOnly=true;} else if(document.activeElement!==rp) rp.value=S.riderPhone||'';
+    if(document.activeElement!==$('#feeInput')) $('#feeInput').value=S.fee;
+    if(document.activeElement!==$('#avgInput')) $('#avgInput').value=S.avgMin;
+  }
+  function renderAll(){renderStrip();renderConfirm();renderDecision();renderMine();renderRider();renderLists();renderAreas();renderReviews();renderSent();}
+
+  function place(o,status){
+    o.id=S.nextId++; o.status=status; sentId=o.id;
+    if(status==='active'){o.stage='pickup';o.startedAt=Date.now();}
+    S.orders.push(o); S.mine.push(o.id); pending=null; remember(o);
+    save(); $('#orderForm').reset(); resetItems(); renderAll();
+    $('#sent').scrollIntoView({behavior:'smooth',block:'start'});
+    toast(riderNumber()?'Almost done. Text me your order so I get it.':(status==='active'?'Order placed. I\u2019m on my way to pick it up.':'You\u2019re in line.'));
+  }
+
+  function placeReview(o){
+    o.id=S.nextId++; o.status='review'; sentId=o.id;
+    S.orders.push(o); S.mine.push(o.id);
+    save(); $('#orderForm').reset(); resetItems(); $('#addrError').hidden=true; $('#askBtn').hidden=true; renderAll();
+    $('#sent').scrollIntoView({behavior:'smooth',block:'start'});
+    toast(riderNumber()?'Almost done. Text me your request so I get it.':'Request sent. I\u2019ll check if I can deliver there.');
+  }
+
+  $('#orderForm').addEventListener('submit',function(e){
+    e.preventDefault();
+    if(!S.online){toast('I\u2019m offline right now. Try again later.');return;}
+    var f=new FormData(e.target);
+    var o={name:f.get('name').trim(),center:(f.get('center')||'').trim(),place:f.get('place').trim(),itemLines:readItems(e.target),items:readItems(e.target).join('; '),sub:(f.get('sub')||'Text me first'),address:f.get('address').trim(),unit:(f.get('unit')||'').trim(),hood:(f.get('hood')||'').trim(),phone:(f.get('phone')||'').trim(),feeWhen:(f.get('feeWhen')||'now'),paid:false,note:(f.get('note')||'').trim(),fee:S.fee,createdAt:Date.now()};
+    var bad=validateOrderForm(e.target);
+    if(bad){showFormError('Fill in the highlighted fields before placing your order.',bad);return;}
+    $('#formError').hidden=true;
+    if(S.centers.indexOf(o.center)<0){showFormError('Choose one of the shopping centers I pick up from.',$('#f-center'));return;}
+    if(!phoneOk(o.phone)){showFormError('Enter a phone number with area code so I can send the Apple Pay request.',$('#f-phone'));return;}
+    var err=$('#addrError');
+    if(!inArea(o)){
+      err.hidden=false;
+      err.textContent='That address is outside my delivery area. I deliver to: '+S.areas.join(', ')+'. You can ask me to check if I can deliver there.';
+      $('#askBtn').hidden=false;
+      $('#f-address').focus();
+      return;
+    }
+    err.hidden=true; $('#askBtn').hidden=true;
+    sentId=null; renderSent();
+    confirming=o; renderConfirm();
+    $('#confirm').scrollIntoView({behavior:'smooth',block:'start'});
+  });
+
+  document.addEventListener('click',function(e){
+    var t=e.target.closest('[data-tab]');
+    if(t){
+      var tab=t.getAttribute('data-tab');
+      document.querySelectorAll('[data-tab]').forEach(function(b){b.setAttribute('aria-pressed',b===t?'true':'false');});
+      $('#view-order').hidden=tab!=='order'; $('#view-rider').hidden=tab!=='rider';
+      return;
+    }
+    var b=e.target.closest('[data-act]'); if(!b) return;
+    var act=b.getAttribute('data-act'), id=Number(b.getAttribute('data-id')), a=active();
+    if(act==='confirmAddr'&&confirming){
+      var c=confirming; confirming=null; renderConfirm();
+      if(c.outside){
+        if(!S.online){toast('I\u2019m offline right now. Try again later.');return;}
+        placeReview(c); return;
+      }
+      if(!inArea(c)){toast('That address is outside my delivery area.');return;}
+      if(!S.online){toast('I\u2019m offline right now. Try again later.');return;}
+      if(active()){pending=c;renderDecision();$('#decision').scrollIntoView({behavior:'smooth',block:'start'});}
+      else place(c,'active');
+      return;
+    }
+    if(act==='editAddr'){confirming=null;renderConfirm();$('#f-address').focus();return;}
+    if(act==='addCenter'){var v=$('#newPlace').value.trim();if(v){if(S.centers.every(function(x){return x.toLowerCase()!==v.toLowerCase();})) S.centers.push(v);$('#newPlace').value='';}save();renderLists();return;}
+    if(act==='delCenter'){S.centers.splice(Number(b.getAttribute('data-i')),1);save();renderLists();return;}
+    if(act==='addArea'){var w=$('#newArea').value.trim();if(w){addUnique(S.areas,w);$('#newArea').value='';}save();renderAreas();return;}
+    if(act==='delArea'){S.areas.splice(Number(b.getAttribute('data-i')),1);save();renderAreas();return;}
+    if(act==='askRange'){
+      var form=$('#orderForm'); var bad2=validateOrderForm(form);
+      if(bad2){showFormError('Fill in the highlighted fields before asking.',bad2);return;}
+      $('#formError').hidden=true;
+      var g=new FormData(form);
+      var ro2={name:g.get('name').trim(),center:(g.get('center')||'').trim(),place:g.get('place').trim(),itemLines:readItems(form),items:readItems(form).join('; '),sub:(g.get('sub')||'Text me first'),address:g.get('address').trim(),unit:(g.get('unit')||'').trim(),hood:(g.get('hood')||'').trim(),phone:(g.get('phone')||'').trim(),feeWhen:(g.get('feeWhen')||'now'),paid:false,note:(g.get('note')||'').trim(),outside:true,fee:S.fee,createdAt:Date.now()};
+      if(!ro2.name||!ro2.place||!ro2.items||!ro2.address) return;
+      if(S.centers.indexOf(ro2.center)<0){toast('Choose one of the shopping centers I pick up from.');return;}
+      if(!phoneOk(ro2.phone)){toast('Enter a phone number with area code so I can send the Apple Pay request.');$('#f-phone').focus();return;}
+      confirming=ro2; renderConfirm(); $('#confirm').scrollIntoView({behavior:'smooth',block:'start'});
+      return;
+    }
+    if(act==='approve'){
+      var ro=S.orders.find(function(x){return x.id===id;});
+      if(ro&&ro.status==='review'){
+        S.orders.splice(S.orders.indexOf(ro),1); S.orders.push(ro);
+        addUnique(S.okAddrs,ro.address); remember(ro);
+        if(active()){ro.status='queued';}
+        else{ro.status='active';ro.stage='pickup';ro.startedAt=Date.now();}
+        toast('Approved. '+ro.name+' is '+(ro.status==='active'?'up now.':'in line.'));
+      }
+      save(); renderAll(); return;
+    }
+    if(act==='decline'){
+      var rd=S.orders.find(function(x){return x.id===id;});
+      if(rd&&rd.status==='review'){rd.status='declined';toast('Declined.');}
+      save(); renderAll(); return;
+    }
+    if(act==='delOk'){S.okAddrs.splice(Number(b.getAttribute('data-i')),1);save();renderAreas();return;}
+    if(act==='addItem'){addItemRow();return;}
+    if(act==='removeItem'){if(document.querySelectorAll('#itemRows .item').length>1){b.closest('.item').remove();renumberItems();}return;}
+    if(act==='copyOrder'||act==='shareOrder'){
+      var so=S.orders.find(function(x){return x.id===sentId;}); if(!so) return;
+      var txt=orderText(so);
+      if(act==='copyOrder'){
+        copyText(txt).then(function(){toast('Copied. Now paste it in a text to '+fmtPhone(riderNumber())+'.');},
+                           function(){toast('Couldn\u2019t copy. Press and hold the text in the box to copy it.');});
+      }else{
+        try{navigator.share({text:txt}).catch(function(){toast('Sharing isn\u2019t available here. Use Copy order instead.');});}
+        catch(e){toast('Sharing isn\u2019t available here. Use Copy order instead.');}
+      }
+      return;
+    }
+    if(act==='dismissSent'){sentId=null;renderSent();return;}
+    if(act==='togglePaid'){var po=S.orders.find(function(x){return x.id===id;});if(po){po.paid=!po.paid;}save();renderAll();return;}
+    if(act==='clearAddrs'){S.addrs=[];save();renderLists();toast('Saved addresses cleared.');return;}
+    if(act==='join'&&pending){ if(active()) place(pending,'queued'); else place(pending,'active'); return; }
+    if(act==='placeNow'&&pending){ place(pending,'active'); return; }
+    if(act==='declineJoin'){pending=null;renderDecision();toast('Order not sent. Your details are still in the form.');return;}
+    if(act==='picked'&&a){a.stage='onway';}
+    else if(act==='delivered'&&a){a.status='done';promote();toast('Delivered. Nice work!');}
+    else if(act==='cancel'){
+      var o=S.orders.find(function(x){return x.id===id;});
+      if(o){var wasActive=o.status==='active'; o.status='cancelled'; if(wasActive) promote();}
+    }
+    else if(act==='clear'){
+      S.orders=S.orders.filter(function(o){return o.status==='active'||o.status==='queued'||o.status==='review';});
+      S.mine=S.mine.filter(function(id){return S.orders.some(function(o){return o.id===id;});});
+    }
+    else if(act==='reset'){S=fresh();pending=null;confirming=null;}
+    save(); renderAll(); syncSettings();
+  });
+
+  $('#f-address').addEventListener('input',function(){$('#addrError').hidden=true;$('#askBtn').hidden=true;});
+  $('#onlineToggle').addEventListener('change',function(e){S.online=e.target.checked;save();renderAll();});
+  $('#feeInput').addEventListener('change',function(e){var v=parseFloat(e.target.value); S.fee=isNaN(v)||v<0?S.fee:v; save(); renderAll(); syncSettings();});
+  $('#riderPhone').addEventListener('change',function(e){S.riderPhone=e.target.value.trim();save();renderSent();});
+  $('#avgInput').addEventListener('change',function(e){var v=parseInt(e.target.value,10); S.avgMin=isNaN(v)||v<5?S.avgMin:v; save(); renderAll(); syncSettings();});
+  window.addEventListener('storage',function(){S=load();renderAll();syncSettings();});
+  setInterval(renderAll,30000);
+
+  resetItems(); syncSettings(); renderAll();
+})();
+</script>
+</body>
+</html>
